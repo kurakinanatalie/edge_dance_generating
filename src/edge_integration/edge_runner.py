@@ -3,6 +3,27 @@ import glob
 import os
 import torch
 import types
+import sys
+
+def install_pytorch3d_shim():
+    """
+    Install a lightweight pytorch3d.transforms shim by registering it in sys.modules.
+    This makes `from pytorch3d.transforms import ...` work without real PyTorch3D.
+    """
+    try:
+        import edge_integration.pytorch3d_shim as shim
+    except ImportError as e:
+        print("[pytorch3d_shim] Failed to import shim module:", e)
+        return
+
+    # Create a fake 'pytorch3d' package and attach 'transforms' to it.
+    pkg = types.ModuleType("pytorch3d")
+    pkg.transforms = shim
+
+    sys.modules["pytorch3d"] = pkg
+    sys.modules["pytorch3d.transforms"] = shim
+
+    print("[pytorch3d_shim] Installed shim as 'pytorch3d.transforms'")
 
 
 def safe_patch_torch_load():
@@ -103,8 +124,6 @@ def run_edge_from_cache(
     """
     Minimal EDGE runner that uses cached (150x4800) features instead of Jukebox.
     """
-    import sys
-
     edge_repo_dir = Path(edge_repo_dir)
     feature_cache_dir = Path(feature_cache_dir)
     music_dir = Path(music_dir)
@@ -116,6 +135,10 @@ def run_edge_from_cache(
 
     import torch  # re-import under patched load
     safe_patch_torch_load()
+
+    # Install pytorch3d shim before importing EDGE, so that
+    # `from pytorch3d.transforms import ...` works.
+    install_pytorch3d_shim()
 
     from EDGE import EDGE  # type: ignore
 
