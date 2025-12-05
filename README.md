@@ -1,4 +1,4 @@
-# EDGE Dance Generation – HuBERT-based Music-to-Motion Pipeline
+#  EDGE Dance Generation – HuBERT-based Music-to-Motion Pipeline
 
 This repository contains a clean, modular re-implementation of the original  
 **EDGE (Efficient Diffusion for Dance Generation)** preprocessing pipeline.
@@ -11,84 +11,61 @@ The goal of this project is to:
 - make the entire workflow reproducible in **Google Colab**,
 - prepare the system for future fine-tuning (freezing, LoRA, adapters, etc.).
 
-All heavy operations (audio encoding, checkpoint download, rendering)  
-are performed inside Colab — the repository itself contains **model-agnostic code only**.
-
 ---
 
-# Project Structure
+#  Project Structure
 
+```
 src/
-audio_encoders/
-hubert_utils.py # time_resample(), to_chunks()
-hubert_cache.py # HuBERT feature extraction + 4800-D projection
-models/
-projector.py # Lightweight adapter 768 → 4800
-edge_integration/
-pytorch3d_shim/ # Minimal replacement for pytorch3d.transforms
-init.py
-transforms.py
-edge_runner.py # Run EDGE using cached (150×4800) features
-edge_setup.py # Clone EDGE repo + download checkpoint (with fallback)
-colab_utils/
-install_deps.py # Install required Python dependencies
-
-This structure separates:
-
-- **audio processing**,  
-- **models**,  
-- **EDGE integration**,  
-- **Colab-specific utilities**.
+  audio_encoders/
+  models/
+  edge_integration/
+  colab_utils/
+notebooks/
+```
 
 ---
 
-# Getting Started (Google Colab)
+#  Getting Started (Google Colab)
 
-This section describes the **exact order of steps** required to run the project in Google Colab.
-
----
-
-## 1 Install Dependencies
+## **1. Install Dependencies**
 
 ```python
 from colab_utils.install_deps import install_edge_dependencies
 install_edge_dependencies()
+```
 
 This installs:
 
-p_tqdm
+- p_tqdm  
+- tqdm  
+- soundfile  
+- librosa  
+- einops  
+- matplotlib  
+- transformers  
 
-tqdm
+---
 
-soundfile
+## **2. Clone and Prepare the Official EDGE Model**
 
-librosa
-
-einops
-
-matplotlib
-
-transformers
-
-These are required for audio encoding, HuBERT inference, and EDGE rendering.
-
-## 2 Clone and Prepare the Official EDGE Model
-
+```python
 from edge_integration.edge_setup import setup_edge
 EDGE_DIR = setup_edge()
+```
 
+`setup_edge()`:
 
-setup_edge():
+- clones the official Stanford EDGE repo into `/content/EDGE`  
+- downloads the model checkpoint  
+- falls back to gdown if needed  
+- prepares `checkpoint.pt`
 
-clones the official Stanford EDGE repository into /content/EDGE,
+---
 
-downloads the model checkpoint using download_model.sh,
+## **3. Upload Music Files (.wav only)**
 
-if the checkpoint is invalid or too small, downloads a correct version via gdown,
-
-creates/updates checkpoint.pt in the EDGE root directory.
-
-## 3 Upload Music Files (.wav only)
+```python
 from google.colab import files
 from pathlib import Path
 import shutil
@@ -100,8 +77,13 @@ uploaded = files.upload()
 for name in uploaded:
     if name.lower().endswith(".wav"):
         shutil.move(name, MUSIC_DIR / name)
+```
 
-## 4 Build HuBERT Feature Cache (150 × 4800)
+---
+
+## **4. Build HuBERT Feature Cache (150 × 4800)**
+
+```python
 from pathlib import Path
 from audio_encoders.hubert_cache import build_hubert_cache
 
@@ -110,16 +92,19 @@ CACHE_DIR = Path("/content/cache")
 total = build_hubert_cache(
     music_dir=MUSIC_DIR,
     cache_dir=CACHE_DIR,
-    device="cuda"  # CPU also works, but slower
+    device="cuda"
 )
 
 print("Chunks generated:", total)
+```
 
+Each `.wav` file produces several 150-frame slices used as diffusion model conditions.
 
-Each .wav file produces multiple 150-frame feature slices
-expected by the EDGE diffusion model.
+---
 
-## 5 Generate Dance Motion from Cached Features
+## **5. Generate Dance Motion from Cached Features**
+
+```python
 from edge_integration.edge_runner import run_edge_from_cache
 from pathlib import Path
 
@@ -138,88 +123,112 @@ run_edge_from_cache(
     no_render=False,
     cfg_target=7.5
 )
+```
 
+Output files are saved to:
 
-Output motion data and render videos are saved to:
-
+```
 /content/EDGE/renders/
+```
 
-## 6 View the Last Rendered Video
+---
+
+## **6. View the Last Rendered Video**
+
+```python
 from IPython.display import Video
 from pathlib import Path
 
 videos = sorted((EDGE_DIR / "renders").rglob("*.mp4"))
 Video(str(videos[-1]), width=720)
+```
 
-## Technical Overview
+---
 
-HuBERT feature extraction
+#  Technical Overview
 
-build_hubert_cache() uses:
+## **HuBERT Feature Extraction**
 
-Facebook hubert-base-ls960,
+`build_hubert_cache()` uses:
 
-16 kHz audio,
+- facebook/hubert-base-ls960  
+- 16 kHz audio  
+- ~50 Hz latent representations  
+- resampling to 30 Hz  
+- feature normalization  
+- projection to 4800-D (EDGE-compatible)
 
-~50 Hz representations,
+---
 
-linear resampling to 30 Hz,
+## **Projector Model**
 
-feature normalization,
+Located in `models/projector.py`
 
-projection to 4800 dimensions (EDGE-compatible).
+```
+768 → 1536 → 4800
+GELU activations
+Orthogonal initialization
+```
 
-## Projector model
+---
 
-Located in models/projector.py
-Architecture: 768 → 1536 → 4800 with GELU and orthogonal initialization.
+## **pytorch3d shim**
 
-## pytorch3d shim
+EDGE internally requires:
 
-EDGE internally depends on pytorch3d.transforms.
-To avoid installing full PyTorch3D in Colab, the project provides a lightweight
-drop-in replacement inside edge_integration/pytorch3d_shim.
-The runner automatically registers this shim before importing EDGE.
+```
+from pytorch3d.transforms import ...
+```
 
-## EDGE runner
+To avoid installing PyTorch3D (very heavy),  
+this repo includes a **lightweight drop-in replacement**:
 
-A minimal inference wrapper that:
+```
+edge_integration/pytorch3d_shim
+```
 
-loads cached features,
+Automatically activated by the runner.
 
-injects CFG/guidance scale if present,
+---
 
-calls model.render_sample(),
+## **EDGE Runner**
 
-writes video output.
+A minimal wrapper that:
 
-## Future Work
+- loads cached (150×4800) features  
+- applies CFG scale if available  
+- calls `model.render_sample()`  
+- outputs motion sequences and rendered videos  
 
-This codebase is structured to support:
+---
 
-HuBERT fine-tuning
+#  Future Work
 
-Layer freezing strategies
+This structure supports future extensions:
 
-LoRA lightweight adapters
+- HuBERT fine-tuning  
+- Layer freezing experiments  
+- LoRA adapters  
+- Alternative audio encoders  
+- Quantitative evaluation  
+- Ablations  
 
-Alternative audio encoders
+These will later be placed in:
 
-Quantitative evaluation of generated motion
-
-Ablation studies
-
-These will be implemented in future modules under:
-
+```
 src/experiments/
+```
 
-## License
+---
 
-This project integrates components from the Stanford EDGE repository.
-Please refer to the original EDGE license for model usage conditions.
+#  License
 
-## Acknowledgements
+This project integrates components from Stanford's **EDGE** model.  
+Refer to the original EDGE license for model usage conditions.
 
-Stanford TML Lab — original EDGE model
+---
 
-Facebook Research — HuBERT
+#  Acknowledgements
+
+- Stanford TML Lab — original EDGE  
+- Facebook Research — HuBERT  
