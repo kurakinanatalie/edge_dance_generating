@@ -2,3 +2,10 @@ __pycache__/
 *.pyc
 *.pyo
 .ipynb_checkpoints/
+.DS_Store
+
+# Colab / runtime artifacts
+/content/
+cache_*/
+renders*/
+eval*/
