@@ -48,7 +48,7 @@ def extract_hubert(path: Path, fe, model, device="cuda", target_sr=16000):
 
 
 def build_hubert_cache(
-    music_dir: Path,
+    music_dir = Path(music_dir),
     cache_dir: Path,
     device: str = "cuda",
     chunk_len: int = 150,
@@ -65,9 +65,8 @@ def build_hubert_cache(
 
     # Load HuBERT + projector
     fe, hubert = load_hubert(device)
-    #projector = Projector().to(device).eval()
-    
-    # Prepare Projector (optionally load fine-tuned weights)
+       
+        # Prepare Projector (optionally load fine-tuned weights)
     proj = Projector().to(device)
     if projector_ckpt is not None:
         projector_ckpt = Path(projector_ckpt)
@@ -98,7 +97,7 @@ def build_hubert_cache(
 
             # Step 4 — Project to 4800-dim Jukebox-like space
             with torch.no_grad():
-                proj_out = projector(torch.from_numpy(hub_norm).to(device))
+                proj_out = proj(torch.from_numpy(hub_norm).to(device))
                 proj_np = proj_out.cpu().numpy().astype(np.float32)
 
             # Step 5 — Split into slices
