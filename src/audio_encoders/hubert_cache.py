@@ -1,6 +1,7 @@
 # src/audio_encoders/hubert_cache.py
 
 from pathlib import Path
+from typing import Optional
 import numpy as np
 import torch
 import torch.nn as nn
@@ -51,16 +52,29 @@ def build_hubert_cache(
     cache_dir: Path,
     device: str = "cuda",
     chunk_len: int = 150,
-):
+    projector_ckpt: Optional[Path] = None,
+)-> int:
     """
     Build HuBERT-based feature cache compatible with EDGE (150 x 4800 slices).
     Saves .npy chunks to cache_dir/<song>/<i>.npy.
+
+    If projector_ckpt is provided, loads Projector weights from that checkpoint.
     """
+    cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     # Load HuBERT + projector
     fe, hubert = load_hubert(device)
-    projector = Projector().to(device).eval()
+    #projector = Projector().to(device).eval()
+    
+    # Prepare Projector (optionally load fine-tuned weights)
+    proj = Projector().to(device)
+    if projector_ckpt is not None:
+        projector_ckpt = Path(projector_ckpt)
+        print(f"[hubert_cache] Loading Projector weights from {projector_ckpt}")
+        state = torch.load(str(projector_ckpt), map_location=device)
+        proj.load_state_dict(state)
+    proj.eval()
 
     wavs = sorted(music_dir.glob("*.wav"))
     if not wavs:
