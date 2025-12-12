@@ -9,3 +9,8 @@ __pycache__/
 cache_*/
 renders*/
 eval*/
+
+checkpoints/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
