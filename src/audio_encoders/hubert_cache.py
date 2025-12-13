@@ -48,7 +48,7 @@ def extract_hubert(path: Path, fe, model, device="cuda", target_sr=16000):
 
 
 def build_hubert_cache(
-    music_dir = Path(music_dir),
+    music_dir: Path,
     cache_dir: Path,
     device: str = "cuda",
     chunk_len: int = 150,
@@ -66,7 +66,7 @@ def build_hubert_cache(
     # Load HuBERT + projector
     fe, hubert = load_hubert(device)
        
-        # Prepare Projector (optionally load fine-tuned weights)
+    # Prepare Projector (optionally load fine-tuned weights)
     proj = Projector().to(device)
     if projector_ckpt is not None:
         projector_ckpt = Path(projector_ckpt)
@@ -120,4 +120,5 @@ def build_hubert_cache(
             print(f"Error processing {w.name}: {e}")
 
     print(f"\nTotal chunks: {total_chunks}")
+
     return total_chunks
