@@ -281,7 +281,7 @@ def run_rhythm_projector_finetune(
     max_tracks: Optional[int] = None,
     max_chunks_per_track: Optional[int] = None,
     chunk_len: int = 150,
-    epochs: int = 3,
+    epochs: int = 5,
     batch_size: int = 4,
     lr: float = 1e-4,
     lambda_smooth: float = 1.0,
@@ -368,3 +368,4 @@ def run_rhythm_projector_finetune(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(projector.state_dict(), str(output_path))
     print(f"[train] Saved rhythm-aware Projector to {output_path}")
+
