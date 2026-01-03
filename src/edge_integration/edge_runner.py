@@ -184,14 +184,13 @@ def run_edge_from_cache(
 
     for i in range(len(batches)):
         data_tuple = (None, batches[i], names[i])
-
-        # Use wav stem as a unique tag so outputs are not overwritten.
-        # Example: ".../mWA1.wav" -> "mWA1"
+    
+        # Use wav stem as a unique tag so outputs are not overwritten
         if names[i] and isinstance(names[i], list) and len(names[i]) > 0:
-        render_tag = Path(names[i][0]).stem
-    else:
-        render_tag = f"track_{i}"
-        
+            render_tag = Path(names[i][0]).stem
+        else:
+            render_tag = f"track_{i}"
+    
         model.render_sample(
             data_tuple,
             render_tag,
@@ -201,5 +200,5 @@ def run_edge_from_cache(
             render=not opt.no_render,
         )
 
+print("Done.")
 
-    print("Done.")
