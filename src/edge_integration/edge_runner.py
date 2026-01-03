@@ -68,25 +68,36 @@ def adjust_cfg_scale(model, cfg_target: float):
     if not changed:
         print("[CFG] no CFG/guidance scale attribute found (this is ok).")
 
-
 def load_cached_batches(feature_cache_dir: Path, music_dir: Path, slice_len: int = 150, sample_size: int = 1):
     """
     Load (150,4800) chunks from feature_cache_dir/<song>/<i>.npy.
-    Returns: list of tensors [K,150,4800] and list of filename lists.
+
+    Returns:
+      - batches: list of tensors shaped [K,150,4800]
+      - names:   list of lists of wav-path strings (length K), matched by song stem
+
+    This ensures each cached directory <song>/ is linked to <song>.wav for proper naming + metrics.
     """
     import numpy as np
+    import torch as _torch
+    from pathlib import Path
 
     feature_cache_dir = Path(feature_cache_dir)
     music_dir = Path(music_dir)
 
+    # Index wavs by stem: "mWA1.wav" -> "mWA1"
+    wav_index = {p.stem: str(p) for p in sorted(music_dir.glob("*.wav"))}
+    fallback_wav = next(iter(wav_index.values()), "placeholder.wav")
+
     dirs = sorted([d for d in feature_cache_dir.glob("*/") if d.is_dir()])
-    music_wavs = sorted(music_dir.glob("*.wav"))
-    default_wav = str(music_wavs[0]) if music_wavs else "placeholder.wav"
 
     batches = []
     names = []
 
     for d in dirs:
+        song_stem = d.name
+        song_wav = wav_index.get(song_stem, fallback_wav)
+
         npys = sorted(d.glob("*.npy"))
         if not npys:
             continue
@@ -101,13 +112,12 @@ def load_cached_batches(feature_cache_dir: Path, music_dir: Path, slice_len: int
             continue
 
         cond_sel = cond_list[:sample_size]
-        import torch as _torch
-
         batches.append(_torch.from_numpy(np.stack(cond_sel, axis=0)))  # [K,150,4800]
-        names.append([default_wav] * len(cond_sel))
+
+        # Store the matched wav path so downstream code can use it for unique naming.
+        names.append([song_wav] * len(cond_sel))
 
     return batches, names
-
 
 def run_edge_from_cache(
     edge_repo_dir: Path,
@@ -174,13 +184,22 @@ def run_edge_from_cache(
 
     for i in range(len(batches)):
         data_tuple = (None, batches[i], names[i])
+
+        # Use wav stem as a unique tag so outputs are not overwritten.
+        # Example: ".../mWA1.wav" -> "mWA1"
+        if names[i] and isinstance(names[i], list) and len(names[i]) > 0:
+        render_tag = Path(names[i][0]).stem
+    else:
+        render_tag = f"track_{i}"
+        
         model.render_sample(
             data_tuple,
-            "test",
+            render_tag,
             opt.render_dir,
             render_count=-1,
             fk_out=fk_out,
             render=not opt.no_render,
         )
+
 
     print("Done.")
