@@ -200,5 +200,6 @@ def run_edge_from_cache(
             render=not opt.no_render,
         )
 
-print("Done.")
+    print("Done.")
+
 
