@@ -171,6 +171,9 @@ def train_exp04_e2e(
                     continue
                 starts = np.random.choice(n_chunks, size=take, replace=False)
 
+                track_loss = None
+                chunks_used = 0
+
                 for sidx in starts:
                     start = int(sidx * chunk_len)
                     x = h30[start:start+chunk_len]     # (150,768)
@@ -182,15 +185,24 @@ def train_exp04_e2e(
                         energy = (energy - energy.mean()) / (energy.std() + 1e-6)
                         loss = loss_fn(energy, rr)
 
-                    scaler.scale(loss / grad_accum_steps).backward()
+                    track_loss = loss if track_loss is None else (track_loss + loss)
+                    chunks_used += 1
+
+                    if chunks_used == 0:
+                        continue
+    
+                    # Average loss across selected chunks
+                    track_loss = track_loss / float(chunks_used)
+
+                    scaler.scale(track_loss / grad_accum_steps).backward()
 
                     if ((step + 1) % grad_accum_steps) == 0:
                         scaler.step(opt)
                         scaler.update()
                         opt.zero_grad(set_to_none=True)
 
-                    if (step % 25) == 0:
-                        print(f"[exp04] step {step:5d} | {wav_path.stem} | loss {loss.item():.4f}")
+                    if (step % 10) == 0:
+                        print(f"[exp04] step {step:5d} | {wav_path.stem} | loss {track_loss.item():.4f} | chunks {chunks_used}")
                     step += 1
 
             except Exception as e:
