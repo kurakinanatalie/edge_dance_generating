@@ -1,157 +1,127 @@
-
 # src/audio_encoders/lora.py
+# Lightweight LoRA utilities without external deps.
+# IMPORTANT: do NOT create cyclic Module references (causes RecursionError in named_modules).
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Optional, Tuple, List, Dict
+from typing import Iterable, Tuple, Dict, Any
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 @dataclass
 class LoRAConfig:
-    """
-    Minimal LoRA config for Linear layers.
-
-    r: LoRA rank
-    alpha: scaling (effective scale = alpha / r)
-    dropout: dropout applied to LoRA branch
-    target_keywords: which module names to adapt (matched by substring)
-    """
     r: int = 8
     alpha: float = 16.0
-    dropout: float = 0.0
-    target_keywords: Tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "out_proj")  # safe default
+    dropout: float = 0.05
+    target_keywords: Tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "out_proj")
 
 
 class LoRALinear(nn.Module):
     """
-    Wraps an existing nn.Linear with a trainable low-rank update:
-      y = W x + (alpha/r) * B(A(x))
+    Wraps an existing nn.Linear and adds a trainable low-rank update:
+        W' = W + (alpha/r) * (B @ A)
+    where:
+        A: (r, in_features)
+        B: (out_features, r)
 
-    Base linear W is frozen by default (we freeze outside).
+    NOTE:
+      - We keep the original Linear as a submodule (self.base).
+      - We MUST NOT attach the wrapper back onto base (would create a cycle).
     """
     def __init__(self, base: nn.Linear, r: int, alpha: float, dropout: float):
         super().__init__()
         if not isinstance(base, nn.Linear):
-            raise TypeError("LoRALinear expects nn.Linear as base")
+            raise TypeError("LoRALinear expects an nn.Linear base module")
 
         self.base = base
-        self.in_features = base.in_features
-        self.out_features = base.out_features
-
         self.r = int(r)
         self.alpha = float(alpha)
-        self.scaling = self.alpha / max(self.r, 1)
+        self.scaling = self.alpha / max(1, self.r)
+        self.drop = nn.Dropout(p=float(dropout)) if dropout and dropout > 0 else nn.Identity()
 
-        self.dropout = nn.Dropout(p=float(dropout)) if dropout and dropout > 0 else nn.Identity()
+        in_f = base.in_features
+        out_f = base.out_features
 
-        # LoRA parameters
-        # A: (r, in_features), B: (out_features, r)
-        self.A = nn.Parameter(torch.zeros(self.r, self.in_features))
-        self.B = nn.Parameter(torch.zeros(self.out_features, self.r))
+        # LoRA params
+        self.lora_A = nn.Parameter(torch.zeros(self.r, in_f))
+        self.lora_B = nn.Parameter(torch.zeros(out_f, self.r))
 
-        # Init: A ~ N(0, 0.02), B = 0 => start identical to base
-        nn.init.normal_(self.A, mean=0.0, std=0.02)
-        nn.init.zeros_(self.B)
+        # Init: A small random, B zeros => start as no-op
+        nn.init.kaiming_uniform_(self.lora_A, a=5**0.5)
+        nn.init.zeros_(self.lora_B)
+
+        # Freeze base weights by default (caller can override)
+        for p in self.base.parameters():
+            p.requires_grad = False
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        y0 = self.base(x)
+        # Base linear
+        y = self.base(x)
+        # LoRA update
         # x: (..., in_features)
-        x_d = self.dropout(x)
-        # (..., r)
-        lora_h = torch.matmul(x_d, self.A.t())
-        # (..., out_features)
-        lora_y = torch.matmul(lora_h, self.B.t()) * self.scaling
-        return y0 + lora_y
+        # A: (r, in_features) => x @ A.T => (..., r)
+        # B: (out_features, r) => (..., r) @ B.T => (..., out_features)
+        dx = self.drop(x)
+        lora = (dx @ self.lora_A.t()) @ self.lora_B.t()
+        return y + self.scaling * lora
 
 
-def _iter_named_modules(model: nn.Module) -> Iterable[Tuple[str, nn.Module]]:
-    for name, module in model.named_modules():
-        yield name, module
+def _matches(name: str, keywords: Iterable[str]) -> bool:
+    name = name.lower()
+    return any(k.lower() in name for k in keywords)
 
 
-def _replace_module(parent: nn.Module, child_name: str, new_module: nn.Module) -> None:
-    # child_name is attribute name within parent
-    setattr(parent, child_name, new_module)
+@torch.no_grad()
+def _count_params(m: nn.Module) -> Tuple[int, int]:
+    total = sum(p.numel() for p in m.parameters())
+    trainable = sum(p.numel() for p in m.parameters() if p.requires_grad)
+    return int(trainable), int(total)
 
 
 def inject_lora_into_hubert(
     hubert: nn.Module,
-    cfg: Optional[LoRAConfig] = None,
+    cfg: LoRAConfig,
     freeze_base: bool = True,
-) -> Dict[str, int]:
+) -> Dict[str, Any]:
     """
-    Inject LoRA adapters into selected nn.Linear layers of a HuBERT model.
+    Replace selected nn.Linear layers inside HuBERT with LoRALinear wrappers.
 
-    Returns a dict with counts:
-      { "replaced_linear": int, "trainable_params": int, "total_params": int }
+    Safe strategy:
+      - Iterate parent modules via named_modules()
+      - Replace only via parent.named_children() (no parent maps, no cycles)
+      - Do NOT store parent refs inside nn.Module objects
 
-    Notes:
-    - We do NOT assume specific HF internal class names.
-    - We match modules by name substring, so it's robust across versions.
+    Returns info dict with counts.
     """
-    if cfg is None:
-        cfg = LoRAConfig()
-
-    # Optionally freeze everything first
     if freeze_base:
         for p in hubert.parameters():
             p.requires_grad = False
 
     replaced = 0
 
-    # We need parent pointers to replace children. Easiest: loop over parent.named_children recursively.
-    # We'll do a manual traversal over named_modules, and for each module, inspect its direct children.
-    for parent_name, parent in hubert.named_modules():
+    # Iterate over a snapshot of modules to avoid modifying while iterating
+    for parent_name, parent in list(hubert.named_modules()):
+        # Replace only direct children of this parent
         for child_name, child in list(parent.named_children()):
-            full_name = f"{parent_name}.{child_name}" if parent_name else child_name
-
-            if isinstance(child, nn.Linear) and any(k in full_name for k in cfg.target_keywords):
-                wrapped = LoRALinear(child, r=cfg.r, alpha=cfg.alpha, dropout=cfg.dropout)
-                _replace_module(parent, child_name, wrapped)
+            if isinstance(child, nn.Linear) and _matches(child_name, cfg.target_keywords):
+                setattr(parent, child_name, LoRALinear(child, r=cfg.r, alpha=cfg.alpha, dropout=cfg.dropout))
                 replaced += 1
 
-    # Ensure LoRA params are trainable
+    # Make LoRA params trainable
     for m in hubert.modules():
         if isinstance(m, LoRALinear):
-            m.A.requires_grad = True
-            m.B.requires_grad = True
+            m.lora_A.requires_grad = True
+            m.lora_B.requires_grad = True
+            # base already frozen inside LoRALinear
 
-    trainable = sum(p.numel() for p in hubert.parameters() if p.requires_grad)
-    total = sum(p.numel() for p in hubert.parameters())
-
+    trainable, total = _count_params(hubert)
     return {
-        "replaced_linear": int(replaced),
-        "trainable_params": int(trainable),
-        "total_params": int(total),
+        "replaced_linear": replaced,
+        "trainable_params": trainable,
+        "total_params": total,
+        "trainable_ratio": float(trainable) / float(max(1, total)),
     }
-
-
-def lora_state_dict(hubert: nn.Module) -> Dict[str, torch.Tensor]:
-    """
-    Extract ONLY LoRA weights (A and B matrices) to save small checkpoints.
-    """
-    sd: Dict[str, torch.Tensor] = {}
-    for name, module in hubert.named_modules():
-        if isinstance(module, LoRALinear):
-            sd[f"{name}.A"] = module.A.detach().cpu()
-            sd[f"{name}.B"] = module.B.detach().cpu()
-            sd[f"{name}.alpha"] = torch.tensor(module.alpha)
-            sd[f"{name}.r"] = torch.tensor(module.r)
-    return sd
-
-
-def load_lora_state_dict(hubert: nn.Module, sd: Dict[str, torch.Tensor]) -> None:
-    """
-    Load LoRA weights into a model that already has LoRALinear injected.
-    """
-    for name, module in hubert.named_modules():
-        if isinstance(module, LoRALinear):
-            keyA = f"{name}.A"
-            keyB = f"{name}.B"
-            if keyA in sd and keyB in sd:
-                module.A.data.copy_(sd[keyA].to(module.A.device))
-                module.B.data.copy_(sd[keyB].to(module.B.device))
