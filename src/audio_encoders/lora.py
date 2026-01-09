@@ -25,9 +25,6 @@ class LoRALinear(nn.Module):
     """
     def __init__(self, base: nn.Linear, r: int, alpha: float, dropout: float):
         super().__init__()
-        if not isinstance(base, nn.Linear):
-            raise TypeError("LoRALinear expects an nn.Linear as base")
-
         self.base = base
         self.r = int(r)
         self.alpha = float(alpha)
@@ -37,12 +34,8 @@ class LoRALinear(nn.Module):
         in_f = base.in_features
         out_f = base.out_features
 
-        #Put LoRA params on same device/dtype as base
-        dev = base.weight.device
-        dt = base.weight.dtype
-
-        self.lora_A = nn.Parameter(torch.zeros(self.r, in_f, device=dev, dtype=dt))
-        self.lora_B = nn.Parameter(torch.zeros(out_f, self.r, device=dev, dtype=dt))
+        self.lora_A = nn.Parameter(torch.zeros(self.r, in_f))
+        self.lora_B = nn.Parameter(torch.zeros(out_f, self.r))
 
         nn.init.kaiming_uniform_(self.lora_A, a=5**0.5)
         nn.init.zeros_(self.lora_B)
@@ -52,6 +45,11 @@ class LoRALinear(nn.Module):
             p.requires_grad = False
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.lora_A.device != x.device:
+            self.lora_A.data = self.lora_A.data.to(x.device)
+        if self.lora_B.device != x.device:
+            self.lora_B.data = self.lora_B.data.to(x.device)
+        
         y0 = self.base(x)
         dx = self.drop(x)
         lora = (dx @ self.lora_A.t()) @ self.lora_B.t()
