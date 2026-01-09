@@ -45,15 +45,19 @@ class LoRALinear(nn.Module):
             p.requires_grad = False
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if next(self.base.parameters()).device != x.device:
+            self.base = self.base.to(x.device)
+
         if self.lora_A.device != x.device:
             self.lora_A.data = self.lora_A.data.to(x.device)
         if self.lora_B.device != x.device:
             self.lora_B.data = self.lora_B.data.to(x.device)
-        
+
         y0 = self.base(x)
         dx = self.drop(x)
         lora = (dx @ self.lora_A.t()) @ self.lora_B.t()
         return y0 + self.scaling * lora
+
 
 
 def _matches(name: str, keywords: Iterable[str]) -> bool:
