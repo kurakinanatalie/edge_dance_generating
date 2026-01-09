@@ -37,8 +37,12 @@ class LoRALinear(nn.Module):
         in_f = base.in_features
         out_f = base.out_features
 
-        self.lora_A = nn.Parameter(torch.zeros(self.r, in_f))
-        self.lora_B = nn.Parameter(torch.zeros(out_f, self.r))
+        #Put LoRA params on same device/dtype as base
+        dev = base.weight.device
+        dt = base.weight.dtype
+
+        self.lora_A = nn.Parameter(torch.zeros(self.r, in_f, device=dev, dtype=dt))
+        self.lora_B = nn.Parameter(torch.zeros(out_f, self.r, device=dev, dtype=dt))
 
         nn.init.kaiming_uniform_(self.lora_A, a=5**0.5)
         nn.init.zeros_(self.lora_B)
@@ -109,8 +113,18 @@ def inject_lora_into_hubert(
     triples = _iter_parents_bfs(hubert)
     for parent, child_name, child in triples:
         if isinstance(child, nn.Linear) and _matches(child_name, cfg.target_keywords):
-            setattr(parent, child_name, LoRALinear(child, r=cfg.r, alpha=cfg.alpha, dropout=cfg.dropout))
-            replaced += 1
+          lora_mod = LoRALinear(
+            child,
+            r=cfg.r,
+            alpha=cfg.alpha,
+            dropout=cfg.dropout,
+        )
+
+        #move LoRA module to same device
+        lora_mod = lora_mod.to(child.weight.device)
+
+        setattr(parent, child_name, lora_mod)
+        replaced += 1
 
     # Ensure LoRA params are trainable
     for m in hubert.modules():
