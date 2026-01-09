@@ -96,39 +96,23 @@ def _iter_parents_bfs(root: nn.Module) -> List[Tuple[nn.Module, str, nn.Module]]
 
     return out
 
-
-def inject_lora_into_hubert(
-    hubert: nn.Module,
-    cfg: LoRAConfig,
-    freeze_base: bool = True,
-) -> Dict[str, Any]:
-    """
-    Replace selected nn.Linear children with LoRALinear.
-    This implementation is robust even if the module graph has accidental cycles.
-    """
+def inject_lora_into_hubert(hubert: nn.Module, cfg: LoRAConfig, freeze_base: bool = True) -> Dict[str, Any]:
     if freeze_base:
         for p in hubert.parameters():
             p.requires_grad = False
 
     replaced = 0
-
     triples = _iter_parents_bfs(hubert)
+
     for parent, child_name, child in triples:
         if isinstance(child, nn.Linear) and _matches(child_name, cfg.target_keywords):
-          lora_mod = LoRALinear(
-            child,
-            r=cfg.r,
-            alpha=cfg.alpha,
-            dropout=cfg.dropout,
-        )
+            lora_mod = LoRALinear(child, r=cfg.r, alpha=cfg.alpha, dropout=cfg.dropout)
 
-        #move LoRA module to same device
-        lora_mod = lora_mod.to(child.weight.device)
+            lora_mod = lora_mod.to(child.weight.device)
 
-        setattr(parent, child_name, lora_mod)
-        replaced += 1
+            setattr(parent, child_name, lora_mod)
+            replaced += 1
 
-    # Ensure LoRA params are trainable
     for m in hubert.modules():
         if isinstance(m, LoRALinear):
             m.lora_A.requires_grad = True
