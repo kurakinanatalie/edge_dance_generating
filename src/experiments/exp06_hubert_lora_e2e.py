@@ -93,11 +93,19 @@ def train_exp06_lora_e2e(
 
     # Models
     fe = AutoFeatureExtractor.from_pretrained(MODEL_NAME)
-    hubert = AutoModel.from_pretrained(MODEL_NAME).to(device)
+    hubert = AutoModel.from_pretrained(MODEL_NAME)
     projector = Projector().to(device)
 
     # Inject LoRA and freeze base weights
     info = inject_lora_into_hubert(hubert, cfg=lora_cfg, freeze_base=True)
+    
+    # IMPORTANT: move AFTER LoRA injection so LoRA params go to GPU too
+    hubert = hubert.to(device)
+
+    bad = [(n, p.device) for n, p in hubert.named_parameters()
+       if p.requires_grad and p.device.type != device.split(":")[0]]
+    print("[exp06] bad trainable params:", bad[:10], "count:", len(bad))
+    
     print("[exp06] LoRA injection:", info)
 
     # Ensure projector trainable
