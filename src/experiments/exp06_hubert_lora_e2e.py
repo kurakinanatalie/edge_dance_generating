@@ -143,10 +143,11 @@ def train_exp06_lora_e2e(
             try:
                 y, sr = _load_audio_mono(wav_path, target_sr=16000)
                 r_30_np = _onset_strength_30fps(y, sr, target_fps=30)  # (T,)
-                    if onset_smooth_window is not None and onset_smooth_window > 1:
-                        w = onset_smooth_window
-                        kernel = np.ones(w, dtype=np.float32) / float(w)
-                        r_30_np = np.convolve(r_30_np, kernel, mode="same")
+                
+                if onset_smooth_window is not None and onset_smooth_window > 1:
+                    w = onset_smooth_window
+                    kernel = np.ones(w, dtype=np.float32) / float(w)
+                    r_30_np = np.convolve(r_30_np, kernel, mode="same")
 
                 inputs = fe(y, sampling_rate=sr, return_tensors="pt")
                 inputs = {k: v.to(device) for k, v in inputs.items()}
