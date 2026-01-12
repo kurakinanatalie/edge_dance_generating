@@ -68,6 +68,7 @@ def train_exp06_lora_e2e(
     lr_lora: float = 1e-4,
     grad_accum_steps: int = 4,
     use_amp: bool = True,
+    onset_smooth_window: int | None = None,
     seed: int = 123,
 ) -> None:
     """
