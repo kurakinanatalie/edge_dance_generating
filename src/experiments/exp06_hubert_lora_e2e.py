@@ -54,6 +54,17 @@ def _onset_strength_30fps(
 def _zscore_torch(x: torch.Tensor) -> torch.Tensor:
     return (x - x.mean()) / (x.std() + 1e-6)
 
+#exp8
+def smoothness_loss(y: torch.Tensor, order: int = 2) -> torch.Tensor:
+    """
+    y: (T, D)
+    order=1 velocity
+    order=2 acceleration
+    order=3 jerk
+    """
+    for _ in range(order):
+        y = y[1:] - y[:-1]
+    return torch.mean(torch.norm(y, dim=-1))
 
 def train_exp06_lora_e2e(
     music_dir: Path,
@@ -69,6 +80,8 @@ def train_exp06_lora_e2e(
     grad_accum_steps: int = 4,
     use_amp: bool = True,
     onset_smooth_window: int | None = None,
+    smooth_lambda: float = 0.0,
+    smooth_order: int = 2,
     seed: int = 123,
 ) -> None:
     """
@@ -193,7 +206,14 @@ def train_exp06_lora_e2e(
                         yproj = projector(x)                      # (150,4800)
                         energy = torch.linalg.norm(yproj, dim=-1) # (150,)
                         energy = _zscore_torch(energy)
-                        loss = loss_fn(energy, rr)
+                        
+                        onset_loss = loss_fn(energy, rr)
+
+                        if smooth_lambda is not None and smooth_lambda > 0.0:
+                            sm_loss = smoothness_loss(yproj.float(), order=smooth_order)
+                            loss = onset_loss + smooth_lambda * sm_loss
+                        else:
+                            loss = onset_loss
 
                     track_loss = track_loss + loss
 
