@@ -190,4 +190,75 @@ def jerk_table(
     if len(df) > 0:
         print("Mean", tagA, "jerk:", df[f"{tagA}_jerk"].mean())
         print("Mean", tagB, "jerk:", df[f"{tagB}_jerk"].mean())
+
+    return df
+
+def summarize_run_from_csv(
+    alignment_csv: Path,
+    jerk_csv: Path,
+    tag: str,
+) -> Dict[str, Any]:
+    """
+    Reads already computed CSVs and returns mean alignment corr and mean jerk.
+    alignment_csv must contain column f"{tag}_corr"
+    jerk_csv must contain column f"{tag}_jerk"
+    """
+    a = pd.read_csv(alignment_csv)
+    j = pd.read_csv(jerk_csv)
+
+    out: Dict[str, Any] = {"tag": tag}
+
+    corr_col = f"{tag}_corr"
+    jerk_col = f"{tag}_jerk"
+
+    out["Alignment_mean_corr"] = float(a[corr_col].mean()) if corr_col in a.columns and len(a) > 0 else float("nan")
+    out["Mean_Jerk"] = float(j[jerk_col].mean()) if jerk_col in j.columns and len(j) > 0 else float("nan")
+    out["n_tracks_alignment"] = int(len(a))
+    out["n_tracks_jerk"] = int(len(j))
+    return out
+
+
+def summarize_runs_table(
+    runs: List[Dict[str, Any]],
+    base_dir: Path,
+    out_csv: Path,
+) -> pd.DataFrame:
+    """
+    Build a single summary table from a list of dict configs.
+
+    runs format example:
+    [
+      {
+        "name": "exp01 Baseline",
+        "tag": "exp01",
+        "alignment_csv": base_dir / "metrics_alignment_exp01_vs_exp06b.csv",
+        "jerk_csv": base_dir / "metrics_jerk_exp01_vs_exp06b.csv",
+      },
+      ...
+    ]
+
+    This assumes each CSV contains columns for the given tag (tag_corr / tag_jerk).
+    """
+    rows: List[Dict[str, Any]] = []
+    for r in runs:
+        s = summarize_run_from_csv(
+            alignment_csv=Path(r["alignment_csv"]),
+            jerk_csv=Path(r["jerk_csv"]),
+            tag=str(r["tag"]),
+        )
+        rows.append(
+            {
+                "Experiment": r.get("name", r["tag"]),
+                "Alignment_mean_corr": s["Alignment_mean_corr"],
+                "Mean_Jerk": s["Mean_Jerk"],
+                "n_tracks_alignment": s["n_tracks_alignment"],
+                "n_tracks_jerk": s["n_tracks_jerk"],
+            }
+        )
+
+    df = pd.DataFrame(rows)
+    out_csv = Path(out_csv)
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_csv, index=False)
+    print("Saved:", out_csv)
     return df
