@@ -2,7 +2,26 @@
   "run_name": "exp10b_wavlm_baseplus_lora_attn_ffn_AIST60",
   "tag": "exp10b",
   "has_meta_json": true,
-  "metrics_files_copied": [],
-  "alignment_summaries": [],
-  "jerk_summaries": []
+  "metrics_files_copied": [
+    "metrics_alignment_exp01_vs_exp10b.csv",
+    "metrics_jerk_exp01_vs_exp10b.csv"
+  ],
+  "alignment_summaries": [
+    {
+      "file": "metrics_alignment_exp01_vs_exp10b.csv",
+      "mean_exp01_corr": 0.15511246473283244,
+      "mean_exp10b_corr": 0.1639232565363479,
+      "mean_exp01_lag": 0.7,
+      "mean_exp10b_lag": 0.31666666666666665,
+      "n_tracks": 60
+    }
+  ],
+  "jerk_summaries": [
+    {
+      "file": "metrics_jerk_exp01_vs_exp10b.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp10b_jerk": 0.21465411372482776,
+      "n_tracks": 60
+    }
+  ]
 }
