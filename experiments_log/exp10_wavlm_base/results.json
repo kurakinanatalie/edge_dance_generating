@@ -1,0 +1,11 @@
+{
+  "experiment": "exp10_wavlm_base",
+  "model_name": "microsoft/wavlm-base",
+  "metrics_vs_exp01": {
+    "mean_corr_exp01": 0.1551124647328325,
+    "mean_jerk_exp01": 0.21208786256611348,
+    "mean_corr_exp10": 0.16392325653634796,
+    "mean_jerk_exp10": 0.21465411372482776
+  },
+  "notes": "Second run numbers recorded here. First run had higher corr but higher jerk."
+}
