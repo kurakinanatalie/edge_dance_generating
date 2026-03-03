@@ -1,0 +1,6 @@
+run_name,smooth_lambda,Alignment_mean_corr,Mean_Jerk,cache_chunks
+exp09_lora_attn_ffn_smoothlam_0p0_AIST60,0.0,0.19347000185873928,0.3858791214724382,445
+exp09_lora_attn_ffn_smoothlam_0p01_AIST60,0.01,0.20037530917673368,0.3614661519726117,445
+exp09_lora_attn_ffn_smoothlam_0p03_AIST60,0.03,0.18483252455804197,0.37871790925661725,445
+exp09_lora_attn_ffn_smoothlam_0p05_AIST60,0.05,0.18858383109249707,0.3192630495876074,445
+exp09_lora_attn_ffn_smoothlam_0p1_AIST60,0.1,0.17545235702261927,0.3028411245594422,445

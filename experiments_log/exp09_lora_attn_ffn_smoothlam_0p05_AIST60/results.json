@@ -3,89 +3,81 @@
   "tag": "exp09",
   "has_meta_json": true,
   "metrics_files_copied": [
-    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
-    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
     "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
-    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
-    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
-    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
-    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
-    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
-    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
-    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv"
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv"
   ],
   "alignment_summaries": [
     {
       "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_corr": 0.1551124636978824,
       "mean_lam_0p01_corr": 0.20037530917673366,
       "mean_exp01_lag": 0.7,
-      "mean_lam_0p01_lag": 0.1,
-      "n_tracks": 60
+      "mean_lam_0p01_lag": 0.1
     },
     {
       "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_corr": 0.1551124636978824,
       "mean_lam_0p03_corr": 0.18483252455804192,
       "mean_exp01_lag": 0.7,
-      "mean_lam_0p03_lag": -0.6166666666666667,
-      "n_tracks": 60
+      "mean_lam_0p03_lag": -0.6166666666666667
     },
     {
       "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_corr": 0.1551124636978824,
       "mean_lam_0p05_corr": 0.18858383109249705,
       "mean_exp01_lag": 0.7,
-      "mean_lam_0p05_lag": 1.2833333333333334,
-      "n_tracks": 60
+      "mean_lam_0p05_lag": 1.2833333333333334
     },
     {
       "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_corr": 0.1551124636978824,
       "mean_lam_0p0_corr": 0.19347000185873925,
       "mean_exp01_lag": 0.7,
-      "mean_lam_0p0_lag": 0.1,
-      "n_tracks": 60
+      "mean_lam_0p0_lag": 0.1
     },
     {
       "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_corr": 0.1551124636978824,
       "mean_lam_0p1_corr": 0.17545235702261922,
       "mean_exp01_lag": 0.7,
-      "mean_lam_0p1_lag": 0.3,
-      "n_tracks": 60
+      "mean_lam_0p1_lag": 0.3
     }
   ],
   "jerk_summaries": [
     {
       "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_jerk": 0.21208786256611348,
-      "mean_lam_0p01_jerk": 0.3614661519726117,
-      "n_tracks": 60
+      "mean_lam_0p01_jerk": 0.3614661519726117
     },
     {
       "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_jerk": 0.21208786256611348,
-      "mean_lam_0p03_jerk": 0.37871790925661725,
-      "n_tracks": 60
+      "mean_lam_0p03_jerk": 0.37871790925661725
     },
     {
       "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_jerk": 0.21208786256611348,
-      "mean_lam_0p05_jerk": 0.3192630495876074,
-      "n_tracks": 60
+      "mean_lam_0p05_jerk": 0.3192630495876074
     },
     {
       "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_jerk": 0.21208786256611348,
-      "mean_lam_0p0_jerk": 0.3858791214724382,
-      "n_tracks": 60
+      "mean_lam_0p0_jerk": 0.3858791214724382
     },
     {
       "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
+      "n_tracks": 60,
       "mean_exp01_jerk": 0.21208786256611348,
-      "mean_lam_0p1_jerk": 0.3028411245594422,
-      "n_tracks": 60
+      "mean_lam_0p1_jerk": 0.3028411245594422
     }
   ]
 }
