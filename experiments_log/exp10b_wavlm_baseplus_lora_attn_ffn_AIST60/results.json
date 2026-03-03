@@ -1,5 +1,6 @@
 {
   "run_name": "exp10b_wavlm_baseplus_lora_attn_ffn_AIST60",
+  "tag": "exp10b",
   "has_meta_json": true,
   "metrics_files_copied": [],
   "alignment_summaries": [],

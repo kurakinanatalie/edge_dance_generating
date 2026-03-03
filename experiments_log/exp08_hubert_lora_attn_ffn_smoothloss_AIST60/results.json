@@ -1,7 +1,75 @@
 {
   "run_name": "exp08_hubert_lora_attn_ffn_smoothloss_AIST60",
+  "tag": "exp08",
   "has_meta_json": true,
-  "metrics_files_copied": [],
-  "alignment_summaries": [],
-  "jerk_summaries": []
+  "metrics_files_copied": [
+    "metrics_alignment_exp01_vs_exp08.csv",
+    "metrics_alignment_exp02_vs_exp08.csv",
+    "metrics_alignment_exp06b_vs_exp08.csv",
+    "metrics_alignment_exp07_vs_exp08.csv",
+    "metrics_jerk_exp01_vs_exp08.csv",
+    "metrics_jerk_exp02_vs_exp08.csv",
+    "metrics_jerk_exp06b_vs_exp08.csv",
+    "metrics_jerk_exp07_vs_exp08.csv"
+  ],
+  "alignment_summaries": [
+    {
+      "file": "metrics_alignment_exp01_vs_exp08.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_exp08_corr": 0.19233789101504553,
+      "mean_exp01_lag": 0.7,
+      "mean_exp08_lag": 0.5666666666666667,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp02_vs_exp08.csv",
+      "mean_exp02_corr": 0.17330504484188933,
+      "mean_exp08_corr": 0.19233789101504553,
+      "mean_exp02_lag": -0.2,
+      "mean_exp08_lag": 0.5666666666666667,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp06b_vs_exp08.csv",
+      "mean_exp06b_corr": 0.1930509084578671,
+      "mean_exp08_corr": 0.19233789101504553,
+      "mean_exp06b_lag": -0.03333333333333333,
+      "mean_exp08_lag": 0.5666666666666667,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp07_vs_exp08.csv",
+      "mean_exp07_corr": 0.18635083618776296,
+      "mean_exp08_corr": 0.19233789101504553,
+      "mean_exp07_lag": 1.9166666666666667,
+      "mean_exp08_lag": 0.5666666666666667,
+      "n_tracks": 60
+    }
+  ],
+  "jerk_summaries": [
+    {
+      "file": "metrics_jerk_exp01_vs_exp08.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp08_jerk": 0.3479801626255115,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp02_vs_exp08.csv",
+      "mean_exp02_jerk": 0.29582304395735265,
+      "mean_exp08_jerk": 0.3479801626255115,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp06b_vs_exp08.csv",
+      "mean_exp06b_jerk": 0.38850862458348273,
+      "mean_exp08_jerk": 0.3479801626255115,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp07_vs_exp08.csv",
+      "mean_exp07_jerk": 0.38819316153724986,
+      "mean_exp08_jerk": 0.3479801626255115,
+      "n_tracks": 60
+    }
+  ]
 }

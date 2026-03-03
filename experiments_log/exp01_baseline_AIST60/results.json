@@ -1,7 +1,233 @@
 {
   "run_name": "exp01_baseline_AIST60",
+  "tag": "exp01",
   "has_meta_json": true,
-  "metrics_files_copied": [],
-  "alignment_summaries": [],
-  "jerk_summaries": []
+  "metrics_files_copied": [
+    "metrics_alignment_exp01_vs_exp02.csv",
+    "metrics_alignment_exp01_vs_exp03.csv",
+    "metrics_alignment_exp01_vs_exp04.csv",
+    "metrics_alignment_exp01_vs_exp05.csv",
+    "metrics_alignment_exp01_vs_exp06a.csv",
+    "metrics_alignment_exp01_vs_exp06b.csv",
+    "metrics_alignment_exp01_vs_exp07.csv",
+    "metrics_alignment_exp01_vs_exp08.csv",
+    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
+    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
+    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
+    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
+    "metrics_alignment_exp01_vs_exp10.csv",
+    "metrics_jerk_exp01_vs_exp02.csv",
+    "metrics_jerk_exp01_vs_exp03.csv",
+    "metrics_jerk_exp01_vs_exp04.csv",
+    "metrics_jerk_exp01_vs_exp05.csv",
+    "metrics_jerk_exp01_vs_exp06a.csv",
+    "metrics_jerk_exp01_vs_exp06b.csv",
+    "metrics_jerk_exp01_vs_exp07.csv",
+    "metrics_jerk_exp01_vs_exp08.csv",
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
+    "metrics_jerk_exp01_vs_exp10.csv"
+  ],
+  "alignment_summaries": [
+    {
+      "file": "metrics_alignment_exp01_vs_exp02.csv",
+      "mean_baseline_corr": 0.1551124636978824,
+      "mean_rhythm_corr": 0.17330504484188933,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp03.csv",
+      "mean_baseline_corr": 0.15511246473283244,
+      "mean_exp03_corr": 0.159909810273995,
+      "mean_baseline_lag": 0.7,
+      "mean_exp03_lag": -1.1833333333333333,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp04.csv",
+      "mean_exp01_corr": 0.15511246473283244,
+      "mean_exp04_corr": 0.1742581434930465,
+      "mean_exp01_lag": 0.7,
+      "mean_exp04_lag": 0.6,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp05.csv",
+      "mean_exp01_corr": 0.15511246473283244,
+      "mean_exp05_corr": 0.16850221989662892,
+      "mean_exp01_lag": 0.7,
+      "mean_exp05_lag": -1.25,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp06a.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_exp06a_corr": 0.1816085940342602,
+      "mean_exp01_lag": 0.7,
+      "mean_exp06a_lag": -0.7833333333333333,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp06b.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_exp06b_corr": 0.1930509084578671,
+      "mean_exp01_lag": 0.7,
+      "mean_exp06b_lag": -0.03333333333333333,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp07.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_exp07_corr": 0.18635083618776296,
+      "mean_exp01_lag": 0.7,
+      "mean_exp07_lag": 1.9166666666666667,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp08.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_exp08_corr": 0.19233789101504553,
+      "mean_exp01_lag": 0.7,
+      "mean_exp08_lag": 0.5666666666666667,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_lam_0p01_corr": 0.20037530917673366,
+      "mean_exp01_lag": 0.7,
+      "mean_lam_0p01_lag": 0.1,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_lam_0p03_corr": 0.18483252455804192,
+      "mean_exp01_lag": 0.7,
+      "mean_lam_0p03_lag": -0.6166666666666667,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_lam_0p05_corr": 0.18858383109249705,
+      "mean_exp01_lag": 0.7,
+      "mean_lam_0p05_lag": 1.2833333333333334,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_lam_0p0_corr": 0.19347000185873925,
+      "mean_exp01_lag": 0.7,
+      "mean_lam_0p0_lag": 0.1,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_lam_0p1_corr": 0.17545235702261922,
+      "mean_exp01_lag": 0.7,
+      "mean_lam_0p1_lag": 0.3,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_alignment_exp01_vs_exp10.csv",
+      "mean_exp01_corr": 0.15511246473283244,
+      "mean_exp10_corr": 0.1639232565363479,
+      "mean_exp01_lag": 0.7,
+      "mean_exp10_lag": 0.31666666666666665,
+      "n_tracks": 60
+    }
+  ],
+  "jerk_summaries": [
+    {
+      "file": "metrics_jerk_exp01_vs_exp02.csv",
+      "mean_baseline_mean_jerk": 0.21208786256611348,
+      "mean_rhythm_mean_jerk": 0.29582304395735265,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp03.csv",
+      "mean_baseline_jerk": 0.21208786256611348,
+      "mean_exp03_jerk": 0.23241900031765303,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp04.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp04_jerk": 0.34047549664974214,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp05.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp05_jerk": 0.346174788971742,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp06a.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp06a_jerk": 0.36354739864667257,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp06b.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp06b_jerk": 0.38850862458348273,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp07.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp07_jerk": 0.38819316153724986,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp08.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp08_jerk": 0.3479801626255115,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p01_AIST60.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_lam_0p01_jerk": 0.3614661519726117,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p03_AIST60.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_lam_0p03_jerk": 0.37871790925661725,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_lam_0p05_jerk": 0.3192630495876074,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p0_AIST60.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_lam_0p0_jerk": 0.3858791214724382,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p1_AIST60.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_lam_0p1_jerk": 0.3028411245594422,
+      "n_tracks": 60
+    },
+    {
+      "file": "metrics_jerk_exp01_vs_exp10.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp10_jerk": 0.21465411372482776,
+      "n_tracks": 60
+    }
+  ]
 }
