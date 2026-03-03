@@ -1,0 +1,26 @@
+{
+  "run_name": "exp09_lora_attn_ffn_smoothlam_0p05_AIST60",
+  "has_meta_json": true,
+  "metrics_files_copied": [
+    "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+    "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv"
+  ],
+  "alignment_summaries": [
+    {
+      "file": "metrics_alignment_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_lam_0p05_corr": 0.18858383109249705,
+      "mean_exp01_lag": 0.7,
+      "mean_lam_0p05_lag": 1.2833333333333334,
+      "n_tracks": 60
+    }
+  ],
+  "jerk_summaries": [
+    {
+      "file": "metrics_jerk_exp01_vs_exp09_lora_attn_ffn_smoothlam_0p05_AIST60.csv",
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_lam_0p05_jerk": 0.3192630495876074,
+      "n_tracks": 60
+    }
+  ]
+}

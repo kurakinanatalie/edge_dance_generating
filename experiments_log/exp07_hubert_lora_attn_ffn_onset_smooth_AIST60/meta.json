@@ -1,0 +1,12 @@
+{
+  "run_name": "exp07_hubert_lora_attn_ffn_onset_smooth_AIST60",
+  "timestamp": "2026-01-12T13:53:35",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "selected_wavs_for_video": [
+    "mKR2.wav",
+    "mBR0.wav",
+    "mLH3.wav"
+  ],
+  "notes": "Exp07: same as exp06b (LoRA attn+ffn) but onset target is smoothed before z-score",
+  "onset_smooth_window_frames": 7
+}

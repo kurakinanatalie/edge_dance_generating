@@ -1,0 +1,7 @@
+{
+  "run_name": "exp10_wavlm_base_lora_attn_ffn_AIST60",
+  "has_meta_json": true,
+  "metrics_files_copied": [],
+  "alignment_summaries": [],
+  "jerk_summaries": []
+}

@@ -1,0 +1,12 @@
+{
+  "run_name": "exp02_rhythm_ft_AIST60",
+  "timestamp": "2026-01-01T21:44:59",
+  "dataset": "AIST audio (60 tracks)",
+  "audio_encoder": "facebook/hubert-base-ls960",
+  "projector": "fine-tuned (rhythm-aware)",
+  "projector_ckpt": "/content/drive/MyDrive/edge_results/exp02_rhythm_ft_AIST60/checkpoints/projector_rhythm.pt",
+  "chunk_len": 150,
+  "cfg_target": 7.5,
+  "out_length_sec": 10.0,
+  "notes": "Experiment 2: fine-tuned projector, rebuilt cache, ran EDGE generation."
+}

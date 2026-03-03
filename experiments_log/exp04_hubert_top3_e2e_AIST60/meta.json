@@ -1,0 +1,6 @@
+{
+  "run_name": "exp04_hubert_top3_e2e_AIST60",
+  "timestamp": "2026-01-04T13:01:34",
+  "experiment": "STRICT end-to-end wav->HuBERT(top3)->Projector (rhythm target)",
+  "dataset": "AIST 60 tracks"
+}

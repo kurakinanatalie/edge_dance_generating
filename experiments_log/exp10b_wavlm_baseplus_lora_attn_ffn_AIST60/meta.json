@@ -1,0 +1,12 @@
+{
+  "run_name": "exp10b_wavlm_baseplus_lora_attn_ffn_AIST60",
+  "timestamp": "2026-03-03T15:05:18",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "model_name": "microsoft/wavlm-base-plus",
+  "selected_wavs_for_video": [
+    "mKR2.wav",
+    "mBR0.wav",
+    "mLH3.wav"
+  ],
+  "notes": "Exp10: WavLM base \u0432\u043c\u0435\u0441\u0442\u043e HuBERT, LoRA attn+ffn + projector training"
+}

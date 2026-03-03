@@ -1,0 +1,16 @@
+{
+  "run_name": "exp09_lora_attn_ffn_smoothlam_0p0_AIST60",
+  "timestamp": "2026-01-16T19:41:24",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "selected_wavs_for_video": [
+    "mKR2.wav",
+    "mBR0.wav",
+    "mLH3.wav"
+  ],
+  "notes": "Exp09 lambda sweep for smoothness loss, based on exp06b LoRA attn+ffn",
+  "smooth_lambda": 0.0,
+  "smooth_order": 2,
+  "epochs": 2,
+  "chunk_len": 150,
+  "max_chunks_per_track": 3
+}

@@ -1,0 +1,7 @@
+{
+  "run_name": "exp03_hubert_top3_ft_AIST60",
+  "timestamp": "2026-01-04T12:15:02",
+  "experiment": "HuBERT partial fine-tuning (top 3 layers) + projector",
+  "dataset": "AIST 60 tracks",
+  "notes": ""
+}

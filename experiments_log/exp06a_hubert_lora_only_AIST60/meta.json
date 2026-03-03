@@ -1,0 +1,11 @@
+{
+  "run_name": "exp06a_hubert_lora_only_AIST60",
+  "timestamp": "2026-01-09T16:17:53",
+  "experiment": "HuBERT LoRA (qkv/out) + Projector frozen",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "selected_wavs_for_video": [
+    "mKR2.wav",
+    "mBR0.wav",
+    "mLH3.wav"
+  ]
+}

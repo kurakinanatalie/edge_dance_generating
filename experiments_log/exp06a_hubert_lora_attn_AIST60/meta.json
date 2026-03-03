@@ -1,0 +1,11 @@
+{
+  "run_name": "exp06a_hubert_lora_attn_AIST60",
+  "timestamp": "2026-01-09T19:03:43",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "selected_wavs_for_video": [
+    "mKR2.wav",
+    "mBR0.wav",
+    "mLH3.wav"
+  ],
+  "notes": "Exp06: LoRA on HuBERT + Projector, rhythm-target loss (EDGE frozen)."
+}

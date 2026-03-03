@@ -1,0 +1,11 @@
+{
+  "run_name": "exp06b_hubert_lora_attn_ffn_AIST60",
+  "timestamp": "2026-01-11T14:55:55",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "selected_wavs_for_video": [
+    "mKR2.wav",
+    "mBR0.wav",
+    "mLH3.wav"
+  ],
+  "notes": "Exp06b: HuBERT LoRA on attention + FFN layers, end-to-end, rhythm loss, EDGE frozen"
+}

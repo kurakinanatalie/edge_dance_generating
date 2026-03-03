@@ -1,0 +1,6 @@
+{
+  "run_name": "exp01_baseline_AIST60",
+  "timestamp": "2025-12-13T21:37:46",
+  "projector_finetuned": false,
+  "notes": "Baseline run saved to real Google Drive after remount."
+}
