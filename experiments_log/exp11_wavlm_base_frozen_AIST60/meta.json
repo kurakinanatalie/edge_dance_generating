@@ -1,0 +1,7 @@
+{
+  "run_name": "exp11_wavlm_base_frozen_AIST60",
+  "timestamp": "2026-03-11T15:28:13",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "model_name": "microsoft/wavlm-base",
+  "strategy": "frozen encoder baseline"
+}
