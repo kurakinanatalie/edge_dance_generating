@@ -1,0 +1,9 @@
+{
+  "run_name": "exp13_wavlm_base_lora_smooth_AIST60",
+  "timestamp": "2026-03-11T15:53:56",
+  "music_dir": "/content/drive/MyDrive/edge_music_AIST60",
+  "model_name": "microsoft/wavlm-base",
+  "strategy": "LoRA plus projector plus smoothness loss",
+  "smooth_lambda": 0.01,
+  "smooth_order": 2
+}

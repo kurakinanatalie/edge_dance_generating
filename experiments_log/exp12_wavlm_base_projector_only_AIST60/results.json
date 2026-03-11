@@ -1,0 +1,27 @@
+{
+  "run_name": "exp12_wavlm_base_projector_only_AIST60",
+  "tag": "exp12",
+  "has_meta_json": true,
+  "metrics_files_copied": [
+    "metrics_alignment_exp01_vs_exp12.csv",
+    "metrics_jerk_exp01_vs_exp12.csv"
+  ],
+  "alignment_summaries": [
+    {
+      "file": "metrics_alignment_exp01_vs_exp12.csv",
+      "n_tracks": 60,
+      "mean_exp01_corr": 0.1551124636978824,
+      "mean_exp12_corr": 0.16906270628692868,
+      "mean_exp01_lag": 0.7,
+      "mean_exp12_lag": 0.43333333333333335
+    }
+  ],
+  "jerk_summaries": [
+    {
+      "file": "metrics_jerk_exp01_vs_exp12.csv",
+      "n_tracks": 60,
+      "mean_exp01_jerk": 0.21208786256611348,
+      "mean_exp12_jerk": 0.2689723789691925
+    }
+  ]
+}
