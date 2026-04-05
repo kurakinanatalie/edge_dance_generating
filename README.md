@@ -1,27 +1,31 @@
-#  EDGE Dance Generation – HuBERT-based Music-to-Motion Pipeline
+# EDGE Dance Generation (HuBERT & WavLM)
 
-This repository contains a clean, modular re-implementation of the original  
-**EDGE (Efficient Diffusion for Dance Generation)** preprocessing pipeline.
+Resource-Efficient Music-to-Motion Pipeline
+
+This repository provides a clean, modular and Google Colab–ready implementation of a music-to-dance generation pipeline based on the EDGE (Editable Dance Generation from Music) framework.
+
+The project focuses on low-resource generative modelling, replacing heavy Jukebox audio features with lightweight self-supervised encoders such as HuBERT and WavLM, while preserving compatibility with the original EDGE diffusion model.
 
 The goal of this project is to:
 
-- replace heavy Jukebox audio features with **HuBERT-based features**,
-- project HuBERT embeddings into the dimensionality expected by EDGE,
-- generate dance motion using cached features,
-- make the entire workflow reproducible in **Google Colab**,
-- prepare the system for future fine-tuning (freezing, LoRA, adapters, etc.).
+- Replace computationally expensive Jukebox embeddings with lightweight audio representations  
+- Enable dance generation on a free Google Colab T4 GPU  
+- Introduce a projection module (768 → 4800) for EDGE compatibility  
+- Support feature caching for fast experimentation  
+- Provide a clean structure for future research (LoRA, fine-tuning, evaluation)  
 
 ---
 
-#  Project Structure
+# Project Structure
 
 ```
 src/
-  audio_encoders/
-  models/
-  edge_integration/
-  colab_utils/
-notebooks/
+audio_encoders/ # HuBERT / WavLM feature extraction
+models/ # Projection networks
+edge_integration/ # EDGE setup and execution
+colab_utils/ # Colab helpers
+
+notebooks/ # Experiment notebooks
 ```
 
 ---
@@ -133,18 +137,6 @@ Output files are saved to:
 
 ---
 
-## **6. View the Last Rendered Video**
-
-```python
-from IPython.display import Video
-from pathlib import Path
-
-videos = sorted((EDGE_DIR / "renders").rglob("*.mp4"))
-Video(str(videos[-1]), width=720)
-```
-
----
-
 #  Technical Overview
 
 ## **HuBERT Feature Extraction**
@@ -193,12 +185,12 @@ Automatically activated by the runner.
 
 ## **EDGE Runner**
 
-A minimal wrapper that:
+The runner:
 
-- loads cached (150×4800) features  
-- applies CFG scale if available  
-- calls `model.render_sample()`  
-- outputs motion sequences and rendered videos  
+- loads cached (150×4800) features
+- applies CFG scale if available
+- calls model.render_sample()
+- outputs motion sequences and rendered videos
 
 ---
 
@@ -206,15 +198,13 @@ A minimal wrapper that:
 
 This structure supports future extensions:
 
-- HuBERT fine-tuning  
-- Layer freezing experiments  
-- LoRA adapters  
-- Alternative audio encoders  
-- Quantitative evaluation  
-- Ablations  
+- HuBERT fine-tuning
+- LoRA adapters
+- Alternative audio encoders
+- Quantitative evaluation
+- Ablation studies  
 
-These will later be placed in:
-
+Planned location:
 ```
 src/experiments/
 ```
@@ -231,4 +221,5 @@ Refer to the original EDGE license for model usage conditions.
 #  Acknowledgements
 
 - Stanford TML Lab — original EDGE  
-- Facebook Research — HuBERT  
+- Facebook Research — HuBERT
+- Microsoft Research — WavLM
