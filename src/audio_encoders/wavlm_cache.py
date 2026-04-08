@@ -177,9 +177,11 @@ def build_wavlm_cache(
                 chunks = chunks[:max_chunks_per_track]
 
             stem = wav_path.stem
+            song_dir = cache_dir / stem
+            song_dir.mkdir(parents=True, exist_ok=True)
+            
             for i, chunk in enumerate(chunks):
-                out_path = cache_dir / f"{stem}_chunk{i:03d}.npy"
-                np.save(out_path, chunk)
+                np.save(song_dir / f"{i}.npy", chunk.astype(np.float32))
                 total_chunks += 1
 
         except Exception as e:
