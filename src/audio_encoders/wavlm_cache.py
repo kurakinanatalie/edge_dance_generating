@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import numpy as np
 import torch
+import torch.nn as nn
 
 from audio_encoders.wavlm_utils import (
     WAVLM_BASE,
@@ -12,7 +13,87 @@ from audio_encoders.wavlm_utils import (
     extract_wavlm_frames,
 )
 from audio_encoders.hubert_utils import time_resample, to_chunks
+from audio_encoders.lora import LoRALinear, LoRAConfig
 from models.projector import Projector
+
+
+def inject_lora_into_model(
+    model: nn.Module,
+    lora_cfg: LoRAConfig,
+) -> Dict[str, Any]:
+    """
+    Freeze the base model and replace selected Linear layers with LoRALinear.
+    """
+    for p in model.parameters():
+        p.requires_grad = False
+
+    replaced = 0
+
+    def _inject(module: nn.Module) -> None:
+        nonlocal replaced
+        for child_name, child in list(module.named_children()):
+            if isinstance(child, nn.Linear) and any(
+                key in child_name for key in lora_cfg.target_keywords
+            ):
+                setattr(
+                    module,
+                    child_name,
+                    LoRALinear(
+                        base=child,
+                        r=lora_cfg.r,
+                        alpha=lora_cfg.alpha,
+                        dropout=lora_cfg.dropout,
+                    ),
+                )
+                replaced += 1
+            else:
+                _inject(child)
+
+    _inject(model)
+
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    total = sum(p.numel() for p in model.parameters())
+
+    return {
+        "replaced_linear": replaced,
+        "trainable_params": trainable,
+        "total_params": total,
+        "trainable_ratio": trainable / max(total, 1),
+    }
+
+
+def load_lora_state_dict(
+    model: nn.Module,
+    lora_ckpt_path: Path,
+    device: str = "cuda",
+) -> Dict[str, Any]:
+    """
+    Load LoRA payload saved by train_wavlm_lora_e2e.py.
+    """
+    payload = torch.load(str(lora_ckpt_path), map_location=device)
+    lora_cfg = LoRAConfig(**payload["lora_cfg"])
+    info = inject_lora_into_model(model, lora_cfg=lora_cfg)
+
+    state_dict = payload["state_dict"]
+    missing = []
+    for module_name, module in model.named_modules():
+        if isinstance(module, LoRALinear):
+            key_a = f"{module_name}.lora_A"
+            key_b = f"{module_name}.lora_B"
+            if key_a in state_dict and key_b in state_dict:
+                module.lora_A.data.copy_(state_dict[key_a].to(device))
+                module.lora_B.data.copy_(state_dict[key_b].to(device))
+            else:
+                missing.append(module_name)
+
+    if missing:
+        print(f"[wavlm_cache] Warning: missing LoRA weights for {len(missing)} modules")
+
+    return {
+        "model_name": payload.get("model_name"),
+        "lora_cfg": payload.get("lora_cfg"),
+        "inject_info": info,
+    }
 
 
 def build_wavlm_cache(
@@ -21,6 +102,7 @@ def build_wavlm_cache(
     device: str = "cuda",
     model_name: str = WAVLM_BASE,
     projector_ckpt: Optional[Path] = None,
+    wavlm_lora_ckpt: Optional[Path] = None,
     chunk_len: int = 150,
     max_tracks: Optional[int] = None,
     max_chunks_per_track: Optional[int] = None,
@@ -30,7 +112,8 @@ def build_wavlm_cache(
 
     Steps:
     - load wav files
-    - extract WavLM features (~50 Hz)
+    - extract WavLM features
+    - optionally load LoRA weights
     - resample to ~30 Hz
     - normalize per clip
     - project 768 -> 4800
@@ -52,6 +135,16 @@ def build_wavlm_cache(
 
     feature_extractor, wavlm_model = load_wavlm(model_name=model_name, device=device)
 
+    if wavlm_lora_ckpt is not None:
+        info = load_lora_state_dict(
+            wavlm_model,
+            lora_ckpt_path=Path(wavlm_lora_ckpt),
+            device=device,
+        )
+        print(f"[wavlm_cache] Loaded LoRA: {info}")
+
+    wavlm_model.eval()
+
     projector = Projector().to(device)
     projector.eval()
 
@@ -68,7 +161,7 @@ def build_wavlm_cache(
                 feature_extractor=feature_extractor,
                 wavlm_model=wavlm_model,
                 device=device,
-            )  # (T,768)
+            )
 
             t30 = max(int(round(frames.shape[0] * 30.0 / 50.0)), 1)
             z = time_resample(frames, t30)
