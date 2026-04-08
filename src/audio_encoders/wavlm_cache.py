@@ -182,7 +182,6 @@ def build_wavlm_cache(
             
             for i, chunk in enumerate(chunks):
                 save_path = song_dir / f"{i}.npy"
-                print("[wavlm_cache][DEBUG] save_path =", save_path)
                 np.save(save_path, chunk.astype(np.float32))
                 total_chunks += 1
 
