@@ -171,7 +171,6 @@ def run_edge_from_cache(
     motion_save_dir: Path | None = None,
     no_render: bool = False,
     cfg_target: float | None = None,
-    post_rotate_x_deg: float | None = 180.0,
 ):
     """
     Minimal EDGE runner that uses cached (150x4800) features instead of Jukebox.
