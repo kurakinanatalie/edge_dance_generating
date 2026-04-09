@@ -1,4 +1,3 @@
-from edge_integration.motion_postprocess import process_motion_dir
 from pathlib import Path
 import glob
 import os
@@ -244,14 +243,6 @@ def run_edge_from_cache(
             fk_out=fk_out,
             render=not opt.no_render,
         )
-
-    if opt.save_motions and post_rotate_x_deg is not None:
-       process_motion_dir(
-           Path(opt.motion_save_dir),
-           x_deg=post_rotate_x_deg,
-           y_deg=0.0,
-           z_deg=0.0,
-       )
 
     print("Done.")
 
