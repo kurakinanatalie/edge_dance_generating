@@ -120,6 +120,47 @@ def load_cached_batches(feature_cache_dir: Path, music_dir: Path, slice_len: int
 
     return batches, names
 
+def install_cpu_cuda_shim():
+    """
+    Make common CUDA calls no-op on CPU-only environments.
+    This is useful when third-party EDGE code contains hardcoded .cuda() calls.
+    """
+    import torch
+    import types
+
+    if torch.cuda.is_available():
+        return
+
+    print("[cpu_shim] CUDA not available, installing CPU fallback shim")
+
+    def _tensor_cuda(self, *args, **kwargs):
+        return self
+
+    def _module_cuda(self, *args, **kwargs):
+        return self
+
+    old_tensor_to = torch.Tensor.to
+    old_module_to = torch.nn.Module.to
+
+    def _tensor_to(self, *args, **kwargs):
+        if len(args) > 0 and isinstance(args[0], str) and args[0] == "cuda":
+            args = ("cpu",) + args[1:]
+        if "device" in kwargs and kwargs["device"] == "cuda":
+            kwargs["device"] = "cpu"
+        return old_tensor_to(self, *args, **kwargs)
+
+    def _module_to(self, *args, **kwargs):
+        if len(args) > 0 and isinstance(args[0], str) and args[0] == "cuda":
+            args = ("cpu",) + args[1:]
+        if "device" in kwargs and kwargs["device"] == "cuda":
+            kwargs["device"] = "cpu"
+        return old_module_to(self, *args, **kwargs)
+
+    torch.Tensor.cuda = _tensor_cuda
+    torch.nn.Module.cuda = _module_cuda
+    torch.Tensor.to = _tensor_to
+    torch.nn.Module.to = _module_to
+
 def run_edge_from_cache(
     edge_repo_dir: Path,
     feature_cache_dir: Path,
@@ -151,6 +192,8 @@ def run_edge_from_cache(
     # Install pytorch3d shim before importing EDGE, so that
     # `from pytorch3d.transforms import ...` works.
     install_pytorch3d_shim()
+    
+    install_cpu_cuda_shim()
 
     from EDGE import EDGE  # type: ignore
 
