@@ -160,6 +160,81 @@ def install_cpu_cuda_shim():
     torch.Tensor.to = _tensor_to
     torch.nn.Module.to = _module_to
 
+def install_edge_pose_patch(mode: str = "C", floor_to_zero: bool = True, debug: bool = False):
+    """
+    Patch EDGE SMPLSkeleton.forward so pose coordinates are corrected
+    without modifying the original EDGE repository.
+
+    Modes:
+      A: [x, y, z] -> [x, -z,  y]
+      B: [x, y, z] -> [x,  z, -y]
+      C: [x, y, z] -> [x, -y, -z]   # 180 deg around X
+    """
+    import importlib
+    import torch
+
+    mode = str(mode).strip().upper()
+    mode = mode.replace("А", "A").replace("В", "B").replace("С", "C")
+
+    edge_vis = importlib.import_module("vis")
+    SMPLSkeleton = edge_vis.SMPLSkeleton
+
+    # avoid double patching
+    if getattr(SMPLSkeleton.forward, "_edge_pose_patch_installed", False):
+        print(f"[pose_patch] already installed, mode={mode}")
+        return
+
+    original_forward = SMPLSkeleton.forward
+
+    def remap_positions(poses):
+        # poses: [N, L, J, 3]
+        if not torch.is_tensor(poses):
+            poses = torch.as_tensor(poses)
+
+        out = poses.clone()
+
+        x = poses[..., 0].clone()
+        y = poses[..., 1].clone()
+        z = poses[..., 2].clone()
+
+        if mode == "A":
+            out[..., 0] = x
+            out[..., 1] = -z
+            out[..., 2] = y
+        elif mode == "B":
+            out[..., 0] = x
+            out[..., 1] = z
+            out[..., 2] = -y
+        elif mode == "C":
+            out[..., 0] = x
+            out[..., 1] = -y
+            out[..., 2] = -z
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+
+        if floor_to_zero:
+            min_z = out[..., 2].amin(dim=(-1, -2), keepdim=True)
+            out[..., 2] = out[..., 2] - min_z
+
+        return out
+
+    def patched_forward(self, rotations, root_positions):
+        poses = original_forward(self, rotations, root_positions)
+        poses = remap_positions(poses)
+
+        if debug:
+            print(f"[pose_patch] mode={mode}")
+            print("[pose_patch] poses shape:", tuple(poses.shape))
+            print("[pose_patch] root frame0:", poses[0, 0, 0].detach().cpu().numpy())
+            print("[pose_patch] lankle frame0:", poses[0, 0, 7].detach().cpu().numpy())
+            print("[pose_patch] rankle frame0:", poses[0, 0, 8].detach().cpu().numpy())
+
+        return poses
+
+    patched_forward._edge_pose_patch_installed = True
+    SMPLSkeleton.forward = patched_forward
+    print(f"[pose_patch] installed, mode={mode}")
+
 def run_edge_from_cache(
     edge_repo_dir: Path,
     feature_cache_dir: Path,
@@ -182,7 +257,9 @@ def run_edge_from_cache(
     checkpoint = str(checkpoint)
 
     os.chdir(edge_repo_dir)
-    sys.path.append(str(edge_repo_dir))
+    
+    if str(edge_repo_dir) not in sys.path:
+        sys.path.append(str(edge_repo_dir))
 
     import torch  # re-import under patched load
     safe_patch_torch_load()
@@ -190,8 +267,11 @@ def run_edge_from_cache(
     # Install pytorch3d shim before importing EDGE, so that
     # `from pytorch3d.transforms import ...` works.
     install_pytorch3d_shim()
-    
     install_cpu_cuda_shim()
+
+    # import vis after shim is installed, then patch pose conversion
+    import vis  # noqa: F401
+    install_edge_pose_patch(mode="C", floor_to_zero=True, debug=False)
 
     from EDGE import EDGE  # type: ignore
 
@@ -244,5 +324,3 @@ def run_edge_from_cache(
         )
 
     print("Done.")
-
-
