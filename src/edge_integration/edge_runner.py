@@ -227,13 +227,7 @@ def run_edge_from_cache(
     print(f"[runner] tracks found: {len(batches)}")
     fk_out = opt.motion_save_dir if opt.save_motions else None
 
-    for i in range(len(batches)):
-        # flip coordinate system before render
-        batches[i][:, :, 1] *= -1
-        batches[i][:, :, 2] *= -1
-        
-        print("batch shape:", batches[i].shape)
-        
+    for i in range(len(batches)):    
         data_tuple = (None, batches[i], names[i])
             
         # Use wav stem as a unique tag so outputs are not overwritten
